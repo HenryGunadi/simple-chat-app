@@ -1,12 +1,12 @@
 package api
 
 import (
-	"database/sql"
 	"log"
 	"net/http"
 
 	"github.com/HenryGunadi/simple-chat-app/server/config"
 	"github.com/HenryGunadi/simple-chat-app/server/services/auth"
+	"github.com/HenryGunadi/simple-chat-app/server/services/chat"
 	"github.com/HenryGunadi/simple-chat-app/server/services/user"
 	"github.com/gorilla/mux"
 	"github.com/rs/cors"
@@ -14,11 +14,10 @@ import (
 
 type APIServer struct {
 	addr string
-	db   *sql.DB
 }
 
-func NewAPIServer(addr string, db *sql.DB) *APIServer {
-	return &APIServer{addr: addr, db: db}
+func NewAPIServer(addr string) *APIServer {
+	return &APIServer{addr: addr}
 }
 
 func (s *APIServer) Run() error {
@@ -31,16 +30,20 @@ func (s *APIServer) Run() error {
 		HttpOnly: config.Envs.CookiesAuthIsHttpOnly,
 		Secure: config.Envs.CookiesAuthIsSecure,
 	})
-	
 	AuthService := auth.NewAuthService(sessionStore)
-	AuthStore := auth.NewAuthStore(s.db)
-	AuthHandler := auth.NewAuthHandler(AuthStore, AuthService)
+	AuthHandler := auth.NewAuthHandler(AuthService)
 	AuthHandler.RegisteredRoutes(router)
 
 	// user service
-	userStore := user.NewStore(s.db)
-	userHandler := user.NewUserHandler(userStore, AuthService)
+	userHandler := user.NewUserHandler(AuthService)
 	userHandler.RegisterRoutes(router)
+
+	// websocker service
+	hub := chat.NewHub()
+	go hub.Run()
+	router.HandleFunc("/ws", func(w http.ResponseWriter, r *http.Request) {
+		chat.ServeWs(hub, w, r)
+	})
 
 	router.PathPrefix("/public/").Handler(http.StripPrefix("/public/", http.FileServer(http.Dir("../client/public"))))
 

@@ -5,18 +5,16 @@ import (
 	"net/http"
 
 	"github.com/HenryGunadi/simple-chat-app/server/services/auth"
-	"github.com/HenryGunadi/simple-chat-app/server/types"
 	"github.com/HenryGunadi/simple-chat-app/server/utils"
 	"github.com/gorilla/mux"
 )
 
 type Handler struct {
-	store types.UserStore
 	authService *auth.AuthService
 }
 
-func NewUserHandler(store types.UserStore, authService *auth.AuthService) *Handler {
-	return &Handler{store: store, authService: authService}
+func NewUserHandler(authService *auth.AuthService) *Handler {
+	return &Handler{authService: authService}
 } 
 
 func (h *Handler) RegisterRoutes(r *mux.Router) {

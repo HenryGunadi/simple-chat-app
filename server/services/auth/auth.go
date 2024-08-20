@@ -54,7 +54,6 @@ func RequireAuth(handlerFunc http.HandlerFunc, auth *AuthService) http.HandlerFu
 		}
 
 		log.Printf("User is authenticated : %v", u.Name)
-		log.Printf("user data : %v", u)
 
 		handlerFunc(w, r)
 	}

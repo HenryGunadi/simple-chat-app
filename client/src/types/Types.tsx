@@ -19,3 +19,8 @@ export interface HttpRequestProps<T, D> {
 export type LoginResponse = {
 	status: string;
 };
+
+export type ChatType = {
+	id: string;
+	message: string;
+};

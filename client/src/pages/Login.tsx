@@ -1,15 +1,26 @@
-import {useEffect, useState} from 'react';
+import {useEffect} from 'react';
 import {Button} from '../components/common/Button';
-import {HttpRequest} from '../hooks/api/HTTPReqs';
-import UseNavigation from '../hooks/navigate/Navigate';
-import {LoginResponse} from '../types/Types';
+import {getUserSession} from '../hooks/auth/Auth';
+import {useNavigate} from 'react-router-dom';
 
 const Login: React.FC = () => {
-	const [loginStatus, setIsLoginStatus] = useState<LoginResponse | undefined>(undefined);
+	const navigate = useNavigate();
+
+	useEffect(() => {
+		const cookie = getUserSession('user');
+		if (cookie) {
+			localStorage.setItem('cookie', cookie);
+		}
+
+		if (cookie) {
+			navigate('/home');
+		}
+	}, []);
 
 	const handleLogin = () => {
 		window.location.href = 'http://localhost:8080/auth/discord';
 	};
+
 	return (
 		<div>
 			<h1 className="text-center">Login</h1>

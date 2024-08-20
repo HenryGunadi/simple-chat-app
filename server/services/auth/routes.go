@@ -5,18 +5,16 @@ import (
 	"log"
 	"net/http"
 
-	"github.com/HenryGunadi/simple-chat-app/server/types"
 	"github.com/gorilla/mux"
 	"github.com/markbates/goth/gothic"
 )
 
 type Handler struct {
-	store types.AuthStore
 	authService *AuthService
 }
 
-func NewAuthHandler(store types.AuthStore, authService *AuthService) *Handler {
-	return &Handler{store: store, authService: authService}
+func NewAuthHandler(authService *AuthService) *Handler {
+	return &Handler{authService: authService}
 }
 
 func (h *Handler) RegisteredRoutes(r *mux.Router) {
@@ -27,7 +25,7 @@ func (h *Handler) RegisteredRoutes(r *mux.Router) {
 func (h *Handler) HandleProviderLogin(w http.ResponseWriter, r *http.Request) {
 	if u, err := gothic.CompleteUserAuth(w, r); err == nil {
 		log.Println("User is authenticated : ", u)
-		http.Redirect(w, r, "http://localhost:3000", http.StatusFound)
+		http.Redirect(w, r, "http://localhost:3000/home", http.StatusFound)
 	} else {
 		gothic.BeginAuthHandler(w, r)
 	}
@@ -51,6 +49,6 @@ func (h *Handler) HandleAuthCallbackFunction(w http.ResponseWriter, r *http.Requ
 	log.Println("Redirecting to home")
 
 
-	http.Redirect(w, r, "http://localhost:3000", http.StatusTemporaryRedirect)
+	http.Redirect(w, r, "http://localhost:3000/home", http.StatusTemporaryRedirect)
 }
 
